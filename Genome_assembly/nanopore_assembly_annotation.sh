@@ -120,8 +120,12 @@ mkdir "${4}/pgap_annotation"
 cp $7 "${4}/pgap_annotation/template.yaml"
 cp $8 "${4}/pgap_annotation/"
 cp "${4}/${4}.fasta" "${4}/pgap_annotation/"
+cp "${4}/flye_assembly/assembly_info.txt.gz" "${4}/pgap_annotation/"
 cd "${4}/pgap_annotation/"
+gunzip assembly_info.txt.gz
+sed -i 's/_polypolish//g' *
+perl add_topology.pl "${4}.fasta" assembly_info.txt > temp.fasta
+mv temp.fasta "${4}.fasta"
 pgap.py --no-self-update --report-usage-true -c $5 -m 50g template.yaml
 rename "s/annot/${4}/" output/*
 cd ../..
-
