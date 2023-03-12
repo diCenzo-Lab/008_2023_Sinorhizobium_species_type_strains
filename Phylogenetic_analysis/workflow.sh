@@ -27,12 +27,18 @@ mv Genome_files/* Genome_files_input/
 perl Scripts/runProkka.pl Input_files/genomeList.txt # Run prokka to annotate the genomes
 perl Scripts/moveGenomes.pl Input_files/genomeList.txt # Collect important reannotated genome files
 
-# Create phylogeny
+# Create phylogeny with RAxML, with bootstrap support values
 roary -p 16 -f Roary_output -e -i 80 -g 150000 Genome_files/*.gff # Run roary
 trimal -in Roary_output/core_gene_alignment.aln -out core_gene_alignment_trimmed.aln -fasta -automated1 # Trim the alignment made by Roary
 mv core_gene_alignment_trimmed.aln Phylogeny/
 cd Phylogeny/
 raxmlHPC-HYBRID-AVX2 -T 16 -s core_gene_alignment_trimmed.aln -N 100 -n core_gene_phylogeny -f a -p 12345 -x 12345 -m GTRCAT
+cd ../
+
+# Create phylogeny with IQ-TREE 2, with jackknife support values
+cd Phylogeny/
+iqtree2 -s core_gene_alignment_trimmed.aln -m MF -T 12 # Used results to identify best model for next step
+iqtree2 -s core_gene_alignment_trimmed.aln -m GTR+F+I+I+R5 --abayes -J 1000 --jack-prop 0.4 -T 12 --prefix jackknife_0.4
 cd ../
 
 # Calculate AAI
